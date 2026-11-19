@@ -9,7 +9,7 @@ Mark's personal daily dashboard: one installable web app for tasks, calendars, t
   - Drag to reorder or move. On a phone, long-press a task and drop it on a bucket chip. On desktop, the buckets show as columns.
   - Top 3 holds three open tasks per area. A fourth bumps the last one to the front of This week.
 - **Todoist import** (Settings), run once by Mark:
-  - **API token:** Todoist Settings → Integrations → Developer. It is used in the browser only and never stored.
+  - **API token:** on the Todoist website (not the app): Settings → Integrations → Developer, https://app.todoist.com/app/settings/integrations/developer. It is used in the browser only and never stored.
   - **CSV:** export each project as a template CSV and upload them together.
   - Each project gets an area and a bucket. Dated tasks go to This week or Next week by date.
 - **Settings:** home airport (SFO or SJC), backup and restore as JSON, and clearing done tasks.

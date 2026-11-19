@@ -80,7 +80,7 @@ export function ImportTodoist() {
           </div>
           {mode === 'token' ? (
             <div className="stack">
-              <p className="note" style={{ margin: 0 }}>In Todoist, open Settings, then Integrations, then Developer, and copy your API token. It's used once in this browser and never stored.</p>
+              <p className="note" style={{ margin: 0 }}>The token is only on the Todoist website, not in the phone app. Sign in at <a href="https://app.todoist.com/app/settings/integrations/developer" target="_blank" rel="noreferrer">todoist.com, Settings, Integrations, Developer</a> and copy your API token. It's used once in this browser and never stored.</p>
               <label className="field">
                 <span>API token</span>
                 <input className="input" type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} placeholder="Paste token" />
