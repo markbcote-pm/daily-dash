@@ -6,7 +6,8 @@ const KEY = 'daily-dash:v1';
 const empty = (): AppState => ({
   version: 1,
   tasks: [],
-  settings: { homeAirport: 'SFO', lens: 'both' },
+  settings: { homeAirport: 'SFO', lens: 'both', sources: [] },
+  deleted: {},
 });
 
 function load(): AppState {
@@ -42,7 +43,16 @@ export function setState(update: (s: AppState) => AppState) {
 }
 
 export const setTasks = (fn: (t: Task[]) => Task[]) => setState((s) => ({ ...s, tasks: fn(s.tasks) }));
-export const setSettings = (patch: Partial<Settings>) => setState((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
+export const setSettings = (patch: Partial<Settings>) =>
+  setState((s) => ({ ...s, settings: { ...s.settings, ...patch, updatedAt: Date.now() } }));
+
+/** Remove tasks and remember the delete so other devices drop them too. */
+export const removeTasks = (ids: string[]) =>
+  setState((s) => {
+    const now = Date.now();
+    const gone = new Set(ids);
+    return { ...s, tasks: s.tasks.filter((t) => !gone.has(t.id)), deleted: { ...s.deleted, ...Object.fromEntries(ids.map((id) => [id, now])) } };
+  });
 
 export function replaceAll(next: AppState) {
   state = { ...empty(), ...next, settings: { ...empty().settings, ...next.settings } };
@@ -51,6 +61,11 @@ export function replaceAll(next: AppState) {
 }
 
 export const getState = () => state;
+
+export function subscribe(l: () => void) {
+  listeners.add(l);
+  return () => { listeners.delete(l); };
+}
 
 if (typeof window !== 'undefined') {
   // keep two open tabs or windows in step

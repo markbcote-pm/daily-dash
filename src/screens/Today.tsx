@@ -5,6 +5,9 @@ import { TaskList } from '../components/TaskList';
 import { LensSeg } from '../components/Controls';
 import { inBucket, matchesLens } from '../logic/tasks';
 import { toISO } from '../logic/dates';
+import { useCalendar } from '../calendarData';
+import { eventsOnDay, lensesFor, stays } from '../logic/calendar';
+import { EventRow } from './Calendar';
 import type { Lens } from '../types';
 import { LENS_LABEL, TOP_LIMIT } from '../types';
 
@@ -27,6 +30,14 @@ export function Today({ open, go }: { open: (id: string) => void; go: (route: st
   const inbox = inBucket(tasks, 'inbox', lens);
   const openTotal = tasks.filter((t) => !t.done && matchesLens(t, lens)).length;
   const now = new Date();
+  const cal = useCalendar();
+  const lensSet = lensesFor(lens);
+  const todays = eventsOnDay(cal.events, now).filter((e) => lensSet.includes(e.lens) && e.kind === 'calendar' && (e.allDay || e.end > Date.now() - 30 * 60e3));
+  const todayISO = toISO(now);
+  const rentalNotes = lensSet.includes('business')
+    ? stays(cal.events).filter((s) => !s.blocked && (s.checkIn === todayISO || s.checkOut === todayISO))
+        .map((s) => (s.checkIn === todayISO ? `Guest checks in today, ${s.nights} night${s.nights === 1 ? '' : 's'}` : `Guest checks out today${s.turnover === 'same-day' ? ', same-day turnover' : ''}`))
+    : [];
 
   return (
     <TaskDnd>
@@ -89,6 +100,17 @@ export function Today({ open, go }: { open: (id: string) => void; go: (route: st
           </div>
 
           <div className="col">
+            <section className="card" aria-labelledby="cal-today">
+              <div className="card-head">
+                <h2 id="cal-today">Today's calendar</h2>
+                <a className="small" href="#/calendar" style={{ color: 'var(--primary)', fontWeight: 600 }}>{cal.sample ? 'Sample · Week' : 'Week'}</a>
+              </div>
+              {rentalNotes.map((n) => <div key={n} className="badge warn" style={{ display: 'inline-block', margin: '0 6px 8px 0' }}>Tahoe: {n}</div>)}
+              {todays.length
+                ? <div className="list bare">{todays.slice(0, 6).map((e) => <EventRow key={e.id} e={e} day={now} />)}</div>
+                : <p className="small muted" style={{ margin: 0 }}>Nothing else on the calendar today.</p>}
+              {todays.length > 6 && <a className="small" href="#/calendar">+{todays.length - 6} more</a>}
+            </section>
             <section aria-labelledby="week">
               <div className="card-head">
                 <h3 id="week">This week</h3>
@@ -111,7 +133,6 @@ export function Today({ open, go }: { open: (id: string) => void; go: (route: st
             <section className="card" aria-labelledby="next">
               <div className="card-head"><h3 id="next">Coming to this screen</h3></div>
               <div className="soon-grid">
-                <a className="soon-tile" href="#/calendar" style={{ background: 'var(--work-bg)' }}><b style={{ color: 'var(--work)' }}>Calendar</b><span>Work, Life, Business, Training and Rental</span></a>
                 <a className="soon-tile" href="#/trips" style={{ background: 'var(--business-bg)' }}><b style={{ color: 'var(--business)' }}>Next trip</b><span>From {settings.homeAirport}, with prep tasks</span></a>
                 <a className="soon-tile" href="#/training" style={{ background: 'var(--training-bg)' }}><b style={{ color: 'var(--training)' }}>Training</b><span>Today's workout</span></a>
                 <a className="soon-tile" href="#/pins" style={{ background: 'var(--life-bg)' }}><b style={{ color: 'var(--life)' }}>Pinned Research</b><span>This week's pins</span></a>

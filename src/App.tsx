@@ -7,6 +7,7 @@ import { Today } from './screens/Today';
 import { Tasks } from './screens/Tasks';
 import { Settings } from './screens/Settings';
 import { Soon } from './screens/Soon';
+import { Calendar } from './screens/Calendar';
 import type { Bucket } from './types';
 import { BUCKETS } from './types';
 
@@ -47,7 +48,8 @@ export function App() {
   switch (screen) {
     case 'tasks': body = <Tasks bucket={bucket} setBucket={(b) => go(`tasks/${b}`)} open={setSheet} />; break;
     case 'settings': body = <Settings />; break;
-    case 'calendar': case 'trips': case 'training': case 'pins': body = <Soon which={screen} />; break;
+    case 'calendar': body = <Calendar go={go} />; break;
+    case 'trips': case 'training': case 'pins': body = <Soon which={screen} />; break;
     default: body = <Today open={setSheet} go={go} />;
   }
   const composer = screen === 'tasks' && bucket !== 'top'
