@@ -15,7 +15,21 @@ Mark's personal daily dashboard: one installable web app for tasks, calendars, t
 - **Settings:** home airport (SFO or SJC), backup and restore as JSON, and clearing done tasks.
 - **Installable PWA:** manifest, icons and an offline service worker.
 
-Data lives in `localStorage` on each device for now. Sync across devices comes with the calendar phase (Supabase).
+## What's in phase 3
+
+- **Sync:** sign in with an emailed code. Tasks and settings merge between devices: the newest edit wins, and deletes stick. Stored in Supabase with row-level security.
+- **Calendar:**
+  - Work, Life, Business and Training filters, a week strip, and a day-by-day agenda.
+  - Calendars are added as iCal links (Google secret addresses, Airbnb, Outlook, Runna).
+  - Repeating events, time zones and moved meetings are handled. The same flight in two calendars shows once.
+- **Rental view:** Tahoe stays from the Airbnb feed, with:
+  - same-day turnovers
+  - open nights between stays
+  - booked cleanings from the cleaning app's feed, with a flag when a stay has no cleaning booked
+- **Today:** the rest of today's events, plus check-ins and check-outs.
+- Shows sample data until the first calendar is linked.
+
+Setup steps: [docs/SETUP-SYNC.md](docs/SETUP-SYNC.md). Without the Supabase settings, the app keeps working on a single device.
 
 ## Run it
 
@@ -33,8 +47,8 @@ This is a static site. Import the repo in Vercel or Cloudflare Pages with build 
 ## Roadmap
 
 1. Prototype (done)
-2. Tasks core (this)
-3. Calendars: Work, Life, Business, Training, plus Rental from the cleaning app
+2. Tasks core (done)
+3. Sync and calendars: Work, Life, Business, Training, plus Rental (this)
 4. Travel autopilot and the Trips log
 5. Pinned Research
 6. Project threads that become Google Docs

@@ -32,7 +32,7 @@ export interface MoveResult {
 export function moveTask(tasks: Task[], id: string, bucket: Bucket, beforeId?: string | null): MoveResult {
   const task = tasks.find((t) => t.id === id);
   if (!task) return { tasks };
-  const moved: Task = { ...task, bucket };
+  const moved: Task = { ...task, bucket, updatedAt: Date.now() };
   let rest = tasks.filter((t) => t.id !== id);
 
   let idx = beforeId ? rest.findIndex((t) => t.id === beforeId) : -1;
@@ -54,12 +54,13 @@ export function enforceTopLimit(tasks: Task[], lens: Lens, keepId?: string): Mov
   const without = tasks.filter((t) => t.id !== victim.id);
   const firstWeek = without.findIndex((t) => t.bucket === 'week');
   const at = firstWeek === -1 ? without.length : firstWeek;
-  without.splice(at, 0, { ...victim, bucket: 'week' });
+  without.splice(at, 0, { ...victim, bucket: 'week', updatedAt: Date.now() });
   return { tasks: without, bumped: victim.title };
 }
 
 export function addTask(tasks: Task[], title: string, lens: Lens, bucket: Bucket = 'inbox', due?: string): MoveResult {
-  const t: Task = { id: uid(), title: title.trim(), lens, bucket, done: false, createdAt: Date.now(), due };
+  const now = Date.now();
+  const t: Task = { id: uid(), title: title.trim(), lens, bucket, done: false, createdAt: now, updatedAt: now, due };
   if (!t.title) return { tasks };
   // new items go to the top of their bucket
   const first = tasks.findIndex((x) => x.bucket === bucket);
@@ -69,11 +70,11 @@ export function addTask(tasks: Task[], title: string, lens: Lens, bucket: Bucket
 }
 
 export function toggleTask(tasks: Task[], id: string): Task[] {
-  return tasks.map((t) => (t.id === id ? { ...t, done: !t.done, doneAt: t.done ? undefined : Date.now() } : t));
+  return tasks.map((t) => (t.id === id ? { ...t, done: !t.done, doneAt: t.done ? undefined : Date.now(), updatedAt: Date.now() } : t));
 }
 
 export function updateTask(tasks: Task[], id: string, patch: Partial<Task>): MoveResult {
-  const next = tasks.map((t) => (t.id === id ? { ...t, ...patch } : t));
+  const next = tasks.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: Date.now() } : t));
   const t = next.find((x) => x.id === id);
   return t && t.bucket === 'top' ? enforceTopLimit(next, t.lens, id) : { tasks: next };
 }

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
-import { getState, replaceAll, setSettings, setTasks, useAppState } from '../store';
-import { clearDone } from '../logic/tasks';
+import { getState, removeTasks, replaceAll, setSettings, useAppState } from '../store';
 import { toISO } from '../logic/dates';
 import type { AppState, HomeAirport } from '../types';
 import { ImportTodoist } from './ImportTodoist';
+import { CalendarSources } from './CalendarSources';
+import { SyncCard } from './SyncCard';
 
 const AIRPORTS: { id: HomeAirport; label: string }[] = [
   { id: 'SFO', label: 'SFO · San Francisco' },
@@ -41,7 +42,11 @@ export function Settings() {
     <div className="page">
       <div className="head"><div className="head-text"><span className="eyebrow">Setup</span><h1>Settings</h1></div></div>
       <div className="settings-grid">
-        <ImportTodoist />
+        <div className="stack">
+          <SyncCard />
+          <CalendarSources />
+          <ImportTodoist />
+        </div>
         <div className="stack">
           <section className="card stack" aria-labelledby="travel">
             <h2 id="travel">Travel</h2>
@@ -56,12 +61,12 @@ export function Settings() {
 
           <section className="card stack" aria-labelledby="data">
             <h2 id="data">Your data</h2>
-            <p className="note" style={{ margin: 0 }}>For now everything is saved on this device. Sync across your phone and laptop comes with the calendar phase. Keep a backup until then.</p>
+            <p className="note" style={{ margin: 0 }}>Everything is saved on this device, and in your Supabase database once sync is on. A backup file is a handy extra copy.</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button className="btn" onClick={exportBackup}>Download backup</button>
               <button className="btn" onClick={() => file.current?.click()}>Restore</button>
               <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => restore(e.target.files?.[0])} />
-              <button className="btn ghost" disabled={!doneCount} onClick={() => setTasks(clearDone)}>Clear {doneCount} done</button>
+              <button className="btn ghost" disabled={!doneCount} onClick={() => removeTasks(tasks.filter((t) => t.done).map((t) => t.id))}>Clear {doneCount} done</button>
             </div>
             {msg && <p className="note" role="status" style={{ margin: 0 }}>{msg}</p>}
           </section>

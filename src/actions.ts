@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useToast } from './components/Toast';
-import { getState, setTasks } from './store';
+import { getState, removeTasks, setState, setTasks } from './store';
 import type { Bucket, Lens, Task } from './types';
 import { LENS_LABEL } from './types';
-import { addTask, deleteTask, moveTask, toggleTask, updateTask, type MoveResult } from './logic/tasks';
+import { addTask, moveTask, toggleTask, updateTask, type MoveResult } from './logic/tasks';
 
 export function useActions() {
   const toast = useToast();
@@ -25,10 +25,15 @@ export function useActions() {
       update: (id: string, patch: Partial<Task>) => apply((t) => updateTask(t, id, patch)),
       toggle: (id: string) => setTasks((t) => toggleTask(t, id)),
       remove: (id: string) => {
-        const before = getState().tasks;
-        const gone = before.find((t) => t.id === id);
-        setTasks((t) => deleteTask(t, id));
-        if (gone) toast({ text: `Deleted “${gone.title}”.`, action: { label: 'Undo', run: () => setTasks(() => before) } });
+        const before = getState();
+        const gone = before.tasks.find((t) => t.id === id);
+        removeTasks([id]);
+        if (gone) {
+          toast({
+            text: `Deleted “${gone.title}”.`,
+            action: { label: 'Undo', run: () => setState((s) => ({ ...s, tasks: before.tasks.map((t) => (t.id === id ? { ...t, updatedAt: Date.now() } : t)), deleted: before.deleted })) },
+          });
+        }
       },
     };
   }, [toast]);

@@ -1,3 +1,5 @@
+import type { CalSource } from './logic/calendar';
+
 export type Lens = 'business' | 'life';
 export type LensFilter = Lens | 'both';
 export type Bucket = 'top' | 'inbox' | 'week' | 'next' | 'backlog';
@@ -15,6 +17,8 @@ export interface Task {
   doneAt?: number;
   /** where it came from, e.g. "todoist:Home" */
   source?: string;
+  /** last change, used to merge edits from other devices */
+  updatedAt?: number;
 }
 
 export type HomeAirport = 'SFO' | 'SJC';
@@ -22,12 +26,17 @@ export type HomeAirport = 'SFO' | 'SJC';
 export interface Settings {
   homeAirport: HomeAirport;
   lens: LensFilter;
+  sources: CalSource[];
+  /** when settings last changed, for sync */
+  updatedAt?: number;
 }
 
 export interface AppState {
   version: 1;
   tasks: Task[];
   settings: Settings;
+  /** ids of deleted tasks and when, so a delete on one device sticks on the others */
+  deleted?: Record<string, number>;
 }
 
 export const BUCKETS: { id: Bucket; label: string }[] = [
